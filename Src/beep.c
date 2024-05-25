@@ -6,10 +6,10 @@
 
 void open_beep(int delay) {
     HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET);
-    HAL_Delay(2);
+    HAL_Delay(delay);
 }
 
 void close_beep(int delay) {
     HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET);
-    HAL_Delay(2);
+    HAL_Delay(delay);
 }

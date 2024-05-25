@@ -2,6 +2,8 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Inc/LM75A.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Src/Dc_motor.c" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Src/LM75A.c" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Src/tim.c" charset="UTF-8" />
   </component>
 </project>

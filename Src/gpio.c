@@ -20,7 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
-
+#include "button.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -92,6 +92,25 @@ void MX_GPIO_Init(void)
 
 }
 
-/* USER CODE BEGIN 2 */
 
+
+/* USER CODE BEGIN 2 */
+uint32_t DC_Motor_Count = 0;
+//uint8_t flagk = 0;
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+
+    if(GPIO_Pin == GPIO_PIN_5)
+    {
+
+        DC_Motor_Count++;
+
+    }
+    if(GPIO_Pin == GPIO_PIN_13)
+    {
+        flag1 = 1;
+    }
+
+}
 /* USER CODE END 2 */

@@ -24,6 +24,9 @@
 #include "zlg7290.h"
 #include "button.h"
 #include "beep.h"
+#include "LM75A.h"
+#include "tim.h"
+#include "Dc_motor.h"
 
 #define ZLG_READ_ADDRESS1         0x01
 #define ZLG_READ_ADDRESS2         0x10
@@ -32,6 +35,10 @@
 #define BUFFER_SIZE1              (countof(Tx1_Buffer))
 #define BUFFER_SIZE2              (countof(Rx2_Buffer))
 
+#define TEMP_ROUND 30
+
+uint16_t temp;
+double tmp_val;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -41,21 +48,19 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void Turn_On_LED(uint8_t LED_NUM)
-{
-    switch(LED_NUM)
-    {
+void Turn_On_LED(uint8_t LED_NUM) {
+    switch (LED_NUM) {
         case 0:
-            HAL_GPIO_WritePin(GPIOH,GPIO_PIN_15,GPIO_PIN_RESET); /*����D4��*/
+            HAL_GPIO_WritePin(GPIOH, GPIO_PIN_15, GPIO_PIN_RESET); /*����D4��*/
             break;
         case 1:
-            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_15,GPIO_PIN_RESET); /*����D3��*/
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET); /*����D3��*/
             break;
         case 2:
-            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);  /*����D2��*/
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);  /*����D2��*/
             break;
         case 3:
-            HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_RESET); /*����D1��*/
+            HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_RESET); /*����D1��*/
             break;
         default:
             break;
@@ -94,20 +99,54 @@ int main(void) {
     MX_GPIO_Init();
     MX_I2C1_Init();
     MX_USART1_UART_Init();
+    MX_TIM3_Init();
     /* USER CODE BEGIN 2 */
+    LM75SetMode(CONF_ADDR,NORMOR_MODE);
 
     /* USER CODE END 2 */
-    uint8_t count=0;
+
+    DC_Motor_Pin_Low();
+
+    HAL_TIM_Base_Start_IT(&htim3);   //启动定时器3.
+
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1) {
-        /* USER CODE END WHILE */
+        // get the temp and output to the zlg7290
+        // if tmp > TEMP_ROUND, beep to alarm
+        // and turn on the DC motor to cool down the temp
 
+        if ((temp = LM75GetTempReg()) != EVL_ER) {
+            tmp_val = LM75GetTempValue(temp);
+        } else {
+            // error_handler();
+            // TODO: error handler
+        }
 
+        if (tmp_val > TEMP_ROUND) {
+            open_beep(2);
+            close_beep(2);
+            Turn_On_LED(0);
+            // TODO turn on the DC motor
 
-//        close_beep(2);
-        /* USER CODE BEGIN 3 */
+        } else {
+            // TODO
+        }
     }
+
+        if(flag1 == 1)
+        {
+            flag1 = 0;
+            I2C_ZLG7290_Read(&hi2c1,0x71,0x01,Rx1_Buffer,1);
+            printf("\n\r按键键值 = %#x\r\n",Rx1_Buffer[0]);
+            DC_Task(Rx1_Buffer[0]);
+        }
+        //DC_Motor_Data
+//        Led(DC_Motor_Data);
+
+        HAL_Delay(100);
+    }
+
     /* USER CODE END 3 */
 }
 
