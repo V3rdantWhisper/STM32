@@ -118,7 +118,6 @@ int main(void)
           I2C_ZLG7290_Read(&hi2c1,0x71,0x10,Rx2_Buffer,8);
           switch_flag();
       }
-
   }
   /* USER CODE END 3 */
 }

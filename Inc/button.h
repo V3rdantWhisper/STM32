@@ -16,4 +16,15 @@ extern uint8_t Rx1_Buffer[1];
 void swtich_key(void);
 void switch_flag(void);
 
+#define TIME_MAX 99999999
+
+uint8_t time_buffer[8] = {0};
+uint64_t now_time = 0;
+uint8_t bottom_num;
+
+
+
+
+
+
 #endif //STM32V3_BUTTON_C_H
