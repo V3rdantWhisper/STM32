@@ -28,7 +28,6 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-extern  uint32_t DC_Motor_Count;
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
