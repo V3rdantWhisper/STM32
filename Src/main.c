@@ -110,21 +110,21 @@ int main(void)
 
 
 
-  if(cold_start == 0xdeadbeef && 1){ //checksum
-    //热启动
-  }
-  else{
-    //冷启动
-    HAL_Delay(0x4000);    // 上电复位延时处理
-    now_state = 0;
-    saved_state = 0;
-    cold_start = 0xdeadbeef;
-  }
+  
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+    if(cold_start == 0xdeadbeef && 1){ //checksum
+      //热启动
+    }
+    else{
+      //冷启动
+      HAL_Delay(0x4000);    // 上电复位延时处理
+      now_state = 0;
+      saved_state = 0;
+      cold_start = 0xdeadbeef;
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
