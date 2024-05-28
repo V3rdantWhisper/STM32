@@ -48,6 +48,7 @@ MEMORY
   CCMRAM    (xrw)    : ORIGIN = 0x10000000,   LENGTH = 64K
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 1024K
+  NO_INIT  (xrw)   : ORIGIN = 0x2001C000, LENGTH = 1K 
 }
 
 /* Sections */
@@ -195,6 +196,13 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
+
+  .noinit :
+  {
+    . = ALIGN(4);
+    *(.noinit*)
+    . = ALIGN(4);
+  } > NO_INIT
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

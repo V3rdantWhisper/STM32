@@ -280,7 +280,7 @@
 #endif /* HAL_GPIO_MODULE_ENABLED */
 
 #ifdef HAL_EXTI_MODULE_ENABLED
-  #include "stm32f4xx_hal_exti.h"
+  //#include "stm32f4xx_hal_exti.h"
 #endif /* HAL_EXTI_MODULE_ENABLED */
 
 #ifdef HAL_DMA_MODULE_ENABLED
