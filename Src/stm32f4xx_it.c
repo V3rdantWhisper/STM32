@@ -70,7 +70,7 @@ extern UART_HandleTypeDef huart1;
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
+  // TODO set the state to idle if timeout
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */

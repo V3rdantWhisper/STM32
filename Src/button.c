@@ -1,24 +1,81 @@
 //
 // Created by nemo on 5/21/24.
 //
-/* USER CODE BEGIN 4 */
+
 #include "zlg7290.h"
 #include "i2c.h"
 #include "usart.h"
 #include "state_machine.h"
-
 #define TIME_MAX 99999999
 
+uint8_t read_buffer[8] = {0};
 uint8_t time_buffer[8] = {0};
 uint64_t now_time = 0;
 uint8_t bottom_num;
 
+
+uint8_t ZLG7290KeyToNum(uint8_t key);
+
+void FlashTime() {
+    time_buffer[0] = now_time / 10000000;
+    time_buffer[1] = now_time / 1000000 % 10;
+    time_buffer[2] = now_time / 100000 % 10;
+    time_buffer[3] = now_time / 10000 % 10;
+    time_buffer[4] = now_time / 1000 % 10;
+    time_buffer[5] = now_time / 100 % 10;
+    time_buffer[6] = now_time / 10 % 10;
+    time_buffer[7] = now_time % 10;
+    I2C_ZLG7290_Write(&hi2c1, ZLG7290_WRITE_ADDR, ZLG7290_ADDR_DPRAM0, time_buffer, 8);
+}
+
+uint8_t ZLG7290KeyToNum(uint8_t key) {
+    switch (key) {
+        case ZLG7290_KEY_0:
+            return 0;
+            break;
+        case ZLG7290_KEY_1:
+            return 1;
+            break;
+        case ZLG7290_KEY_2:
+            return 2;
+            break;
+        case ZLG7290_KEY_3:
+            return 3;
+            break;
+        case ZLG7290_KEY_4:
+            return 4;
+            break;
+        case ZLG7290_KEY_5:
+            return 5;
+            break;
+        case ZLG7290_KEY_6:
+            return 6;
+            break;
+        case ZLG7290_KEY_7:
+            return 7;
+            break;
+        case ZLG7290_KEY_8:
+            return 8;
+            break;
+        case ZLG7290_KEY_9:
+            return 9;
+            break;
+        default:
+            return ZLG7290_INVALID_NUM;
+            break;
+    }
+}
+
+
+
 void ClockKeyboadProcess() {
+    uint8_t num;
     switch (bottom_num) {
         case ZLG7290_KEY_A:
             if (now_time < TIME_MAX) {
                 now_time++;
             }
+            FlashTime();
             break;
         case ZLG7290_KEY_B:
             if (now_time > 0) {
@@ -27,23 +84,28 @@ void ClockKeyboadProcess() {
             break;
         case ZLG7290_KEY_C:
             now_time = 0;
+            FlashTime();
             break;
         case ZLG7290_KEY_D:
             now_time = 99999999;
+            FlashTime();
             break;
         case ZLG7290_KEY_STAR:
-            enqueue_event(EVENT_SET_ALARM);
+            EnqueueEvent(EVENT_SET_ALARM);
             break;
         case ZLG7290_KEY_POUND:
-            enqueue_event(EVENT_SET_PAUSE);
+//            DequeueEvent(EVENT_SET_PAUSE);
             break;
         default:
-
-            // process number
-            break;
+            num = ZLG7290KeyToNum(bottom_num);
+            if (num == ZLG7290_INVALID_NUM)
+                break;
+            now_time = now_time * 10 + num;
+            if (now_time > TIME_MAX) {
+                now_time = TIME_MAX;
+            }
+            FlashTime();
     }
-
-
 }
 
 

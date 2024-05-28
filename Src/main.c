@@ -28,6 +28,7 @@
 #include "stdio.h"
 #include "button.h"
 #include "stm32f4xx_it.h"
+#include "state_machine.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -110,14 +111,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      if(flag1 == 1)
-      {
-          flag1 = 0;
-          I2C_ZLG7290_Read(&hi2c1,0x71,0x01,Rx1_Buffer,1);
-          swtich_key();
-          I2C_ZLG7290_Read(&hi2c1,0x71,0x10,Rx2_Buffer,8);
-          switch_flag();
-      }
+      handleStateMachine();
   }
   /* USER CODE END 3 */
 }
@@ -170,7 +164,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    flag1 = 1;
+//    flag1 = 1;
 }
 /* USER CODE BEGIN 4 */
 
