@@ -67,13 +67,12 @@ void RUNStateCONFIGTIME(AlarmEvent Event) {
 
 // complete
 void RUNStateALARM(AlarmEvent Event) {
-    if (Event == EVENT_SET_ALARM) {
-        for (int i = 0; i < 100; i++) {
-            open_beep(2);
-            close_beep(2);
-        }
-        now_state = STATE_CONFIG_TIME;
+    for (int i = 0; i < 100; i++) {
+        open_beep(2);
+        close_beep(2);
     }
+    now_state = STATE_CONFIG_TIME;
+
 }
 
 // complete
@@ -83,9 +82,13 @@ void RUNStateTIME(AlarmEvent Event) {
             now_state = STATE_PAUSE;
             break;
         default:
-            now_time--;
-            FlashTime();
-            HAL_Delay(50);
+            if (now_time != 0) {
+                now_time--;
+                FlashTime();
+                HAL_Delay(50);
+            } else {
+                now_state = STATE_ALARM_ON;
+            }
             break;
     }
 }
