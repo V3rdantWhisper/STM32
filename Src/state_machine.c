@@ -7,6 +7,19 @@
 #include "zlg7290.h"
 #include "beep.h"
 
+enum state_numbers{
+    STATE_CHECKSUM_INIT,
+    STATE_CHECKSUM_IDLE,
+    STATE_CHECKSUM_CONFIGTIME,
+    STATE_CHECKSUM_ALARMON,
+    STATE_CHECKSUM_TIME,
+    STATE_CHECKSUM_PAUSE
+};
+uint32_t controlFlowChecksum = STATE_CHECKSUM_INIT;
+int checkControlFlowIntegrity(uint32_t expectedValue) {
+    return controlFlowChecksum == expectedValue;
+}
+
 
 AlarmEvent event_queue[8] = {0};
 uint8_t event_queue_head = 0;
@@ -116,19 +129,39 @@ void handleStateMachine() {
     switch (now_state) {
         case STATE_IDLE:
             // TODO: cfi check
+            if(!checkControlFlowIntegrity(STATE_CHECKSUM_PAUSE) && !checkControlFlowIntegrity(STATE_CHECKSUM_CONFIGTIME)){
+                ;//error
+            }
             RUNSTateIDLE(event);
+            controlFlowChecksum = STATE_CHECKSUM_IDLE;
             break;
         case STATE_CONFIG_TIME:
+            if(!checkControlFlowIntegrity(STATE_CHECKSUM_INIT) && !checkControlFlowIntegrity(STATE_CHECKSUM_ALARMON) && !checkControlFlowIntegrity(STATE_CHECKSUM_CONFIGTIME)){
+                ;//error
+            }
             RUNStateCONFIGTIME(event);
+            controlFlowChecksum = STATE_CHECKSUM_CONFIGTIME;
             break;
         case STATE_TIME:
+            if(!checkControlFlowIntegrity(STATE_CHECKSUM_TIME) && !checkControlFlowIntegrity(STATE_CHECKSUM_PAUSE) && !checkControlFlowIntegrity(STATE_CHECKSUM_CONFIGTIME)){
+                ;//error
+            }
             RUNStateTIME(event);
+            controlFlowChecksum = STATE_CHECKSUM_TIME;
             break;
         case STATE_ALARM_ON:
+            if(!checkControlFlowIntegrity(STATE_CHECKSUM_TIME) ){
+                ; //error      
+            }
             RUNStateALARM(event);
+            controlFlowChecksum = STATE_CHECKSUM_ALARMON;
             break;
         case STATE_PAUSE:
+            if(!checkControlFlowIntegrity(STATE_CHECKSUM_TIME) && !checkControlFlowIntegrity(STATE_CHECKSUM_PAUSE) && !checkControlFlowIntegrity(STATE_CHECKSUM_IDLE)){
+                ; //error      
+            }
             RUNStatePAUSE(event);
+            controlFlowChecksum = STATE_CHECKSUM_PAUSE;
             break;
         default:
             break;
