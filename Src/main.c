@@ -162,10 +162,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-//    flag1 = 1;
-}
+
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */

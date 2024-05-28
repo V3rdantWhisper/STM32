@@ -94,7 +94,7 @@ void ClockKeyboadProcess() {
             EnqueueEvent(EVENT_SET_ALARM);
             break;
         case ZLG7290_KEY_POUND:
-//            DequeueEvent(EVENT_SET_PAUSE);
+            EnqueueEvent(EVENT_SET_PAUSE);
             break;
         default:
             num = ZLG7290KeyToNum(bottom_num);

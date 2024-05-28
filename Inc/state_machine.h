@@ -33,9 +33,13 @@ typedef enum {
     EVENT_SET_TIME,
     EVENT_SET_ALARM,
     EVENT_SET_PAUSE,
-    EVENT_CONFIG_TIME,
+    EVENT_KEYBOARD,
     EVENT_SET_IDLE
 } AlarmEvent;
+
+
+extern AlarmState now_state;
+extern AlarmState saved_state;
 
 
 void handleStateMachine();

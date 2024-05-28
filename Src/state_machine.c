@@ -4,6 +4,7 @@
 #include "stm32f4xx_hal.h"
 #include "state_machine.h"
 #include "button.h"
+#include "zlg7290.h"
 #include "beep.h"
 
 
@@ -15,6 +16,7 @@ AlarmState now_state = STATE_CONFIG_TIME;
 AlarmState saved_state = STATE_CONFIG_TIME;
 
 void EnqueueEvent(AlarmEvent event) {
+    __disable_irq();
     event_queue[event_queue_tail] = event;
     event_queue_tail = (event_queue_tail + 1) % 8;
     if (event_queue_size != 8) {
@@ -22,15 +24,18 @@ void EnqueueEvent(AlarmEvent event) {
     } else {
         event_queue_head = (event_queue_head + 1) % 8;
     }
+    __enable_irq();
 }
 
 AlarmEvent DequeueEvent() {
     if (event_queue_size == 0) {
         return EVENT_NONE;
     }
+    __disable_irq();
     AlarmEvent event = event_queue[event_queue_head];
     event_queue_head = (event_queue_head + 1) % 8;
     event_queue_size--;
+    __enable_irq();
     return event;
 }
 
@@ -44,7 +49,7 @@ void RUNSTateIDLE(AlarmEvent Event) {
 // complete
 void RUNStateCONFIGTIME(AlarmEvent Event) {
     switch (Event) {
-        case EVENT_CONFIG_TIME:
+        case EVENT_KEYBOARD:
             ClockKeyboadProcess();
             break;
         case EVENT_SET_TIME:
@@ -61,7 +66,7 @@ void RUNStateCONFIGTIME(AlarmEvent Event) {
 
 
 // complete
-void RUNStateALARMON(AlarmEvent Event) {
+void RUNStateALARM(AlarmEvent Event) {
     if (Event == EVENT_SET_ALARM) {
         for (int i = 0; i < 100; i++) {
             open_beep(2);
@@ -88,8 +93,9 @@ void RUNStateTIME(AlarmEvent Event) {
 // complete
 void RUNStatePAUSE(AlarmEvent Event) {
     switch (Event) {
-        case EVENT_SET_PAUSE:
-            now_state = STATE_TIME;
+        case EVENT_KEYBOARD:
+            if (bottom_num == ZLG7290_KEY_POUND)
+                now_state = STATE_TIME;
             break;
         case EVENT_SET_IDLE:
             saved_state = STATE_PAUSE;
@@ -116,7 +122,7 @@ void handleStateMachine() {
             RUNStateTIME(event);
             break;
         case STATE_ALARM_ON:
-            RUNStateALARMON(event);
+            RUNStateALARM(event);
             break;
         case STATE_PAUSE:
             RUNStatePAUSE(event);
