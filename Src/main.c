@@ -70,6 +70,8 @@ void SystemClock_Config(void);
 
 /* USER CODE END 0 */
 
+  __attribute__((section(".noinit")))
+volatile uint32_t cold_start;
 /**
   * @brief  The application entry point.
   * @retval int
@@ -106,6 +108,18 @@ int main(void)
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
+
+
+  if(cold_start == 0xdeadbeef && 1){ //checksum
+    //热启动
+  }
+  else{
+    //冷启动
+    HAL_Delay(0x4000);    // 上电复位延时处理
+    now_state = 0;
+    saved_state = 0;
+    cold_start = 0xdeadbeef;
+  }
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -188,6 +202,7 @@ void Error_Handler(void)
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1) {
+
     }
   /* USER CODE END Error_Handler_Debug */
 }
