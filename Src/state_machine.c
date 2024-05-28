@@ -6,6 +6,7 @@
 #include "button.h"
 #include "zlg7290.h"
 #include "beep.h"
+#include "i2c.h"
 
 
 AlarmEvent event_queue[8] = {0};
@@ -16,7 +17,7 @@ AlarmState now_state = STATE_CONFIG_TIME;
 AlarmState saved_state = STATE_CONFIG_TIME;
 
 void EnqueueEvent(AlarmEvent event) {
-    __disable_irq();
+//    __disable_irq();
     event_queue[event_queue_tail] = event;
     event_queue_tail = (event_queue_tail + 1) % 8;
     if (event_queue_size != 8) {
@@ -24,18 +25,18 @@ void EnqueueEvent(AlarmEvent event) {
     } else {
         event_queue_head = (event_queue_head + 1) % 8;
     }
-    __enable_irq();
+//    __enable_irq();
 }
 
 AlarmEvent DequeueEvent() {
     if (event_queue_size == 0) {
         return EVENT_NONE;
     }
-    __disable_irq();
+//    __disable_irq();
     AlarmEvent event = event_queue[event_queue_head];
     event_queue_head = (event_queue_head + 1) % 8;
     event_queue_size--;
-    __enable_irq();
+//    __enable_irq();
     return event;
 }
 
@@ -47,9 +48,19 @@ void RUNSTateIDLE(AlarmEvent Event) {
 }
 
 // complete
-void RUNStateCONFIGTIME(AlarmEvent Event) {
+void RUNStateCONFIGTIME(uint8_t Event) {
     switch (Event) {
         case EVENT_KEYBOARD:
+            __HAL_RCC_I2C1_FORCE_RESET();
+            __HAL_RCC_I2C1_RELEASE_RESET();
+            for (int i = 0; i < 1; i++) {
+                ZLG7290_Read(&hi2c1, ZLG7290_ADDR_KEY, read_buffer, 1);
+            }
+            if ( read_buffer[0] == read_buffer[1] && read_buffer[0] == read_buffer[2] ) {
+                bottom_num = read_buffer[0];
+            } else {
+                return;
+            }
             ClockKeyboadProcess();
             break;
         case EVENT_SET_TIME:
@@ -97,6 +108,14 @@ void RUNStateTIME(AlarmEvent Event) {
 void RUNStatePAUSE(AlarmEvent Event) {
     switch (Event) {
         case EVENT_KEYBOARD:
+            for (int i = 0; i < 3; i++) {
+                ZLG7290_Read(&hi2c1, ZLG7290_ADDR_KEY, &read_buffer[i], 1);
+            }
+            if ( read_buffer[0] == read_buffer[1] && read_buffer[0] == read_buffer[2] ) {
+                bottom_num = read_buffer[0];
+            } else {
+                return;
+            }
             if (bottom_num == ZLG7290_KEY_POUND)
                 now_state = STATE_TIME;
             break;
@@ -111,7 +130,6 @@ void RUNStatePAUSE(AlarmEvent Event) {
 
 
 void handleStateMachine() {
-    // TODO: check Event Queue
     AlarmEvent event = DequeueEvent();
     switch (now_state) {
         case STATE_IDLE:

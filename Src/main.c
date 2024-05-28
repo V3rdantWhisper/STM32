@@ -18,9 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "crc.h"
 #include "i2c.h"
-#include "rng.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -31,6 +29,7 @@
 #include "button.h"
 #include "stm32f4xx_it.h"
 #include "state_machine.h"
+#include "data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,23 +86,27 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  HAL_Delay(100);  // wait for the device to be ready
+   // wait for the device to be ready
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+//  HAL_Delay(1);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
-  MX_RNG_Init();
-  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
+//  SM_INIT();
+
+    if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
+        // Initialization Error
+        Error_Handler();
+    }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -115,11 +118,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     if (now_state != STATE_TIME) {
-        if (__HAL_RNG_GET_FLAG(&hrng, RNG_FLAG_DRDY)) {
-            uint32_t random_number;
-            HAL_RNG_GenerateRandomNumber(&hrng, &random_number);
-            HAL_Delay(random_number % 10);
-        }
+//        if (__HAL_RNG_GET_FLAG(&hrng, RNG_FLAG_DRDY)) {
+//            uint32_t random_number;
+//            HAL_RNG_GenerateRandomNumber(&hrng, &random_number);
+//            HAL_Delay(random_number % 3);
+//        }
     }
     handleStateMachine();
 
@@ -148,8 +151,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 15;
-  RCC_OscInitStruct.PLL.PLLN = 144;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 5;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -166,7 +169,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }

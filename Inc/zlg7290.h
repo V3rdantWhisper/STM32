@@ -93,8 +93,16 @@ enum
 /*
  * Function Arena
  * */
-void I2C_ZLG7290_Read(I2C_HandleTypeDef *I2Cx, uint8_t I2C_Addr, uint8_t addr, uint8_t *buf, uint8_t num);
-void I2C_ZLG7290_Write(I2C_HandleTypeDef *I2Cx, uint8_t I2C_Addr, uint8_t addr, uint8_t *buf, uint8_t num);
+
+
+#define ZLG7290_TIMEOUT_FLAG    ((uint32_t)0x1000)
+#define ZLG7290_TIMEOUT_LONG    ((uint32_t)0xffff)
+
+void ZLG7290_Set_Retries(uint32_t retries);
+void ZLG7290_Set_Timeout(uint32_t timeout);
+
+HAL_StatusTypeDef ZLG7290_Read(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t* buf, uint16_t bufsz);
+HAL_StatusTypeDef ZLG7290_Write(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t* buf, uint16_t bufsz);
 
 
 #endif /* __24C64_OPT_H */

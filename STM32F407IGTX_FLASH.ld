@@ -132,6 +132,22 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+
+  .bak1 :
+  {
+    . = ALIGN(4);
+    _sbak1 = .;        /* create a global symbol at data start */
+    . = ALIGN(4);
+    _ebak1 = .;        /* define a global symbol at data end */
+  } >RAM
+  .crc1 :
+  {
+    . = ALIGN(4);
+    _scrc1 = .;        /* create a global symbol at data start */
+    . = ALIGN(4);
+    _ecrc1 = .;        /* define a global symbol at data end */
+  } >RAM
+
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -185,6 +201,22 @@ SECTIONS
     __bss_end__ = _ebss;
   } >RAM
 
+    .bak2 :
+    {
+      . = ALIGN(4);
+      _sbak2 = .;        /* create a global symbol at data start */
+      . = ALIGN(4);
+      _ebak2 = .;        /* define a global symbol at data end */
+    } >RAM
+
+    .crc2 :
+    {
+      . = ALIGN(4);
+      _scrc2 = .;        /* create a global symbol at data start */
+      . = ALIGN(4);
+      _ecrc2 = .;        /* define a global symbol at data end */
+    } >RAM
+
   /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_heap_stack :
   {
@@ -195,6 +227,16 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
+
+
+  .crc3 :
+  {
+    . = ALIGN(4);
+    _scrc3 = .;        /* create a global symbol at data start */
+    . = ALIGN(4);
+    _ecrc3 = .;        /* define a global symbol at data end */
+  } >RAM
+
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

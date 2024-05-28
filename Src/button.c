@@ -4,7 +4,6 @@
 
 #include "zlg7290.h"
 #include "i2c.h"
-#include "usart.h"
 #include "state_machine.h"
 #define TIME_MAX 99999999
 
@@ -25,7 +24,7 @@ void FlashTime() {
     time_buffer[5] = now_time / 100 % 10;
     time_buffer[6] = now_time / 10 % 10;
     time_buffer[7] = now_time % 10;
-    I2C_ZLG7290_Write(&hi2c1, ZLG7290_WRITE_ADDR, ZLG7290_ADDR_DPRAM0, time_buffer, 8);
+    ZLG7290_Write(&hi2c1, ZLG7290_ADDR_DPRAM0, time_buffer, 8);
 }
 
 uint8_t ZLG7290KeyToNum(uint8_t key) {
