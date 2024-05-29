@@ -70,6 +70,9 @@ void SystemClock_Config(void);
 
 /* USER CODE END 0 */
 
+  __attribute__((section(".noinit")))
+volatile uint32_t cold_start;
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -112,7 +115,16 @@ int main(void)
   {
 
     /* USER CODE END WHILE */
-
+    if(cold_start == 0xdeadbeef && 1){ //checksum
+      //热启动
+    }
+    else{
+      //冷启动
+      HAL_Delay(0x4000);    // 上电复位延时处理
+      now_state = 0;
+      saved_state = 0;
+      cold_start = 0xdeadbeef;
+    }
     /* USER CODE BEGIN 3 */
     if (now_state != STATE_TIME) {
         if (__HAL_RNG_GET_FLAG(&hrng, RNG_FLAG_DRDY)) {
