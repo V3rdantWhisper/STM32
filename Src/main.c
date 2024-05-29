@@ -200,6 +200,24 @@ void Error_Handler(void)
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1) {
+      /* USER CODE END WHILE */
+
+      /* USER CODE BEGIN 3 */
+      // 点亮所有LED
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_SET); 
+      HAL_GPIO_WritePin(GPIOH, GPIO_PIN_15, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
+
+      HAL_Delay(500); // 点亮持续500毫秒
+
+      // 熄灭所有LED
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_10, GPIO_PIN_RESET); 
+      HAL_GPIO_WritePin(GPIOH, GPIO_PIN_15, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+
+      HAL_Delay(500); // 熄灭持续500毫秒
     }
   /* USER CODE END Error_Handler_Debug */
 }
