@@ -53,12 +53,7 @@ void I2C_ResetBus(I2C_HandleTypeDef *hi2c);
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-#define ZLG_READ_ADDRESS1         0x01
-#define ZLG_READ_ADDRESS2         0x10
-#define ZLG_WRITE_ADDRESS1        0x10
-#define ZLG_WRITE_ADDRESS2        0x11
-#define BUFFER_SIZE1              (countof(Tx1_Buffer))
-#define BUFFER_SIZE2              (countof(Rx2_Buffer))
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,9 +66,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
-
-  __attribute__((section(".noinit")))
-volatile uint32_t cold_start;
 
 /**
   * @brief  The application entry point.
@@ -109,7 +101,17 @@ int main(void)
   MX_CRC_Init();
   MX_RNG_Init();
   /* USER CODE BEGIN 2 */
-//  SM_INIT();
+
+  if(cold_start == 0xdeadbeef != 0){ //checksum
+        //热启动
+    } else {
+        //冷启动
+        HAL_Delay(0x40);    // 上电复位延时处理
+        now_state = STATE_CONFIG_TIME;
+        saved_state = STATE_CONFIG_TIME;
+        cold_start = 0xdeadbeef;
+    }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -118,16 +120,7 @@ int main(void)
   {
 
     /* USER CODE END WHILE */
-    if(cold_start == 0xdeadbeef && 1){ //checksum
-      //热启动
-    }
-    else{
-      //冷启动
-      HAL_Delay(0x4000);    // 上电复位延时处理
-      now_state = 0;
-      saved_state = 0;
-      cold_start = 0xdeadbeef;
-    }
+
     /* USER CODE BEGIN 3 */
 
     // Add random delay to avoid collision side channel attack
@@ -166,8 +159,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 25;
-  RCC_OscInitStruct.PLL.PLLN = 336;
+  RCC_OscInitStruct.PLL.PLLM = 15;
+  RCC_OscInitStruct.PLL.PLLN = 144;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 5;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -184,7 +177,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }

@@ -193,8 +193,6 @@ SECTIONS
     _esodata = .;        /* define a global symbol at data end */
   } >RAM
 
-
-
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .bss :

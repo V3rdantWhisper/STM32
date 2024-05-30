@@ -15,13 +15,13 @@
 #define STATE_CHECKSUM_TIME        0x10000
 #define STATE_CHECKSUM_PAUSE       0x100000
 
-#define PRE_STATE_IDLE          STATE_CHECKSUM_PAUSE | STATE_CHECKSUM_CONFIG_TIME
-#define PRE_STATE_PAUSE         STATE_CHECKSUM_PAUSE | STATE_CHECKSUM_IDLE       | STATE_CHECKSUM_TIME
-#define PRE_STATE_TIME          STATE_CHECKSUM_PAUSE | STATE_CHECKSUM_CONFIG_TIME | STATE_CHECKSUM_TIME
-#define PRE_STATE_CONFIG_TIME   STATE_CHECKSUM_INIT  | STATE_CHECKSUM_CONFIG_TIME | STATE_CHECKSUM_ALARM_ON | STATE_CHECKSUM_IDLE
-#define PRE_STATE_ALARM_ON      STATE_CHECKSUM_TIME 
+#define PRE_STATE_IDLE          (STATE_CHECKSUM_PAUSE | STATE_CHECKSUM_CONFIG_TIME)
+#define PRE_STATE_PAUSE         (STATE_CHECKSUM_PAUSE | STATE_CHECKSUM_IDLE | STATE_CHECKSUM_TIME)
+#define PRE_STATE_TIME          (STATE_CHECKSUM_PAUSE | STATE_CHECKSUM_CONFIG_TIME | STATE_CHECKSUM_TIME)
+#define PRE_STATE_CONFIG_TIME   (STATE_CHECKSUM_INIT  | STATE_CHECKSUM_CONFIG_TIME | STATE_CHECKSUM_ALARM_ON | STATE_CHECKSUM_IDLE | STATE_CHECKSUM_PAUSE)
+#define PRE_STATE_ALARM_ON      (STATE_CHECKSUM_TIME)
 
-uint32_t controlFlowChecksum = STATE_CHECKSUM_INIT;
+
 
 AlarmEvent __attribute__((section(".sodata"))) event_queue[8] = {0};
 uint8_t __attribute__((section(".sodata"))) event_queue_head = 0;
@@ -29,6 +29,9 @@ uint8_t __attribute__((section(".sodata"))) event_queue_tail = 0;
 uint8_t __attribute__((section(".sodata"))) event_queue_size = 0;
 AlarmState __attribute__((section(".sodata"))) now_state = STATE_CONFIG_TIME;
 AlarmState __attribute__((section(".sodata"))) saved_state = STATE_CONFIG_TIME;
+uint32_t __attribute__((section(".sodata"))) cold_start;
+uint32_t __attribute__((section(".sodata"))) controlFlowChecksum = STATE_CHECKSUM_INIT;
+
 
 void EnqueueEvent(AlarmEvent event) {
 //    __disable_irq();
@@ -161,37 +164,36 @@ void handleStateMachine() {
     AlarmEvent event = DequeueEvent();
     switch (now_state) {
         case STATE_IDLE:
-            // TODO: cfi check
-            if(controlFlowChecksum | PRE_STATE_IDLE == 0){
-                ;//error
+            if( (controlFlowChecksum & PRE_STATE_IDLE) == 0){
+                Reset_Handler();
             }
             RUNSTateIDLE(event);
             controlFlowChecksum = STATE_CHECKSUM_IDLE;
             break;
         case STATE_CONFIG_TIME:
-            if(controlFlowChecksum | PRE_STATE_CONFIG_TIME == 0){
-                ;//error
+            if( (controlFlowChecksum & PRE_STATE_CONFIG_TIME) == 0){
+                Reset_Handler();
             }
             RUNStateCONFIGTIME(event);
             controlFlowChecksum = STATE_CHECKSUM_CONFIG_TIME;
             break;
         case STATE_TIME:
-            if(controlFlowChecksum | PRE_STATE_TIME == 0){
-                ;//error
+            if( (controlFlowChecksum & PRE_STATE_TIME) == 0){
+                Reset_Handler();
             }
             RUNStateTIME(event);
             controlFlowChecksum = STATE_CHECKSUM_TIME;
             break;
         case STATE_ALARM_ON:
-            if(controlFlowChecksum | PRE_STATE_ALARM_ON == 0){
-                ; //error      
+            if( (controlFlowChecksum & PRE_STATE_ALARM_ON) == 0){
+                Reset_Handler();
             }
             RUNStateALARM(event);
             controlFlowChecksum = STATE_CHECKSUM_ALARM_ON;
             break;
         case STATE_PAUSE:
-            if(controlFlowChecksum | PRE_STATE_PAUSE == 0){
-                ; //error      
+            if( (controlFlowChecksum & PRE_STATE_PAUSE) == 0){
+                Reset_Handler();
             }
             RUNStatePAUSE(event);
             controlFlowChecksum = STATE_CHECKSUM_PAUSE;

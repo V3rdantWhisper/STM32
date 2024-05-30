@@ -39,8 +39,9 @@ typedef enum {
 
 extern AlarmState now_state;
 extern AlarmState saved_state;
+extern uint32_t cold_start;
 
-
+extern void Reset_Handler();
 void handleStateMachine();
 AlarmEvent DequeueEvent();
 void EnqueueEvent(AlarmEvent event);
