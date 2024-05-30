@@ -101,15 +101,16 @@ int main(void)
   MX_CRC_Init();
   MX_RNG_Init();
   /* USER CODE BEGIN 2 */
-
-  if(cold_start == 0xdeadbeef != 0){ //checksum
+  uint32_t cld;
+  GET_NUM_DATE(cold_start, cld);
+  if(cld == 0xdeadbeef != 0){ //checksum
         //热启动
     } else {
         //冷启动
         HAL_Delay(0x40);    // 上电复位延时处理
-        now_state = STATE_CONFIG_TIME;
-        saved_state = STATE_CONFIG_TIME;
-        cold_start = 0xdeadbeef;
+        UPDATE_NUM_BAK(now_state, STATE_CONFIG_TIME);
+        UPDATE_NUM_BAK(now_state, STATE_CONFIG_TIME);
+        UPDATE_NUM_BAK(cold_start, 0xdeadbeef)
     }
 
   /* USER CODE END 2 */
@@ -183,7 +184,7 @@ void SystemClock_Config(void)
   }
 }
 
-/* USER CODE BEGIN 4 */
+/* USEXCR CODE BEGIN 4 */
 /* USER CODE END 4 */
 
 /**

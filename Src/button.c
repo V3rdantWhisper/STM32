@@ -4,6 +4,7 @@
 
 #include "zlg7290.h"
 #include "i2c.h"
+#include "data.h"
 #include "state_machine.h"
 #define TIME_MAX 99999999
 
@@ -108,24 +109,28 @@ uint8_t num_to_ZLG7290Key(uint8_t num) {
 
 void ClockKeyboadProcess() {
     uint8_t num;
+    uint64_t now_bak = 0;
+    GET_NUM_DATE(now_time, now_bak);
+
     switch (bottom_num) {
         case ZLG7290_KEY_A:
-            if (now_time < TIME_MAX) {
-                now_time++;
+            if (now_bak < TIME_MAX) {
+                UPDATE_NUM_BAK(now_time, now_bak + 1);
+                FlashTime();
             }
-            FlashTime();
             break;
         case ZLG7290_KEY_B:
-            if (now_time > 0) {
-                now_time--;
+            if (now_bak > 0) {
+                UPDATE_NUM_BAK(now_time, now_bak - 1);
+                FlashTime();
             }
             break;
         case ZLG7290_KEY_C:
-            now_time = 0;
+            UPDATE_NUM_BAK(now_time, 0);
             FlashTime();
             break;
         case ZLG7290_KEY_D:
-            now_time = 99999999;
+            UPDATE_NUM_BAK(now_time, 99999999);
             FlashTime();
             break;
         case ZLG7290_KEY_STAR:
@@ -138,9 +143,9 @@ void ClockKeyboadProcess() {
             num = ZLG7290KeyToNum(bottom_num);
             if (num == ZLG7290_INVALID_NUM)
                 break;
-            now_time = now_time * 10 + num;
+            UPDATE_NUM_BAK( now_time, now_time * 10 + num);
             if (now_time > TIME_MAX) {
-                now_time = TIME_MAX;
+                UPDATE_NUM_BAK( now_time, TIME_MAX );
             }
             FlashTime();
     }

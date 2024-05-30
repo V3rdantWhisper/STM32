@@ -3,8 +3,7 @@
 //
 #include "stdint.h"
 #include "stm32f4xx_hal.h"
-#include "i2c.h"
-#include "zlg7290.h"
+#include "data.h"
 #include "button.h"
 #include "state_machine.h"
 
@@ -23,8 +22,8 @@ void HAL_IncTick() {
     uwTick++;
     switch (now_state) {
         case STATE_TIME :
-            if ( now_time != 0 && uwTick % 500 == 0 ) {
-                now_time--;
+            if ( now_time > 0 && uwTick % 500 == 0 ) {
+                UPDATE_NUM_BAK( now_time, now_time-1 );
             }
         case STATE_ALARM_ON:
         case STATE_IDLE:

@@ -13,24 +13,11 @@ typedef enum {
     STATE_ALARM_ON,
     STATE_PAUSE,
 } AlarmState;
-/* STATE_IDLE:
- *   --> STATE_SET_TIME
- * STATE_SET_TIME
- *   --> STATE_IDLE
- * STA
- *
- *
- *
- *
- *
- *
- * */
 
 
 typedef enum {
     EVENT_NONE,
     EVENT_SET_TIME,
-    EVENT_SET_ALARM,
     EVENT_SET_PAUSE,
     EVENT_KEYBOARD,
     EVENT_SET_IDLE
@@ -40,6 +27,7 @@ typedef enum {
 extern AlarmState now_state;
 extern AlarmState saved_state;
 extern uint32_t cold_start;
+extern uint32_t controlFlowChecksum;
 
 extern void Reset_Handler();
 void handleStateMachine();

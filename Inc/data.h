@@ -6,9 +6,9 @@
 #define STM32V3_DATA_H
 
 #include "stdint.h"
-//#include "stm32f4xx_hal_conf.h"
 #include "button.h"
 #include "state_machine.h"
+
 
 #define CREATE_BACKUP_BUF(var) \
     typeof(var) __attribute__((section(".bak1"))) __##var##_bak1 = 0; \
@@ -33,22 +33,22 @@
     extern typeof(var) __##var##_bak2;
 
 
-#define UPDATE_NUM_BAK(var) { \
-   __##var##_bak1 = __##var##_bak2 = var                     \
+#define UPDATE_NUM_BAK(var, val) { \
+   __##var##_bak1 = __##var##_bak2 = var = val;                     \
 }
 
 #define GET_NUM_DATE(var, num) { \
-    if ( __##var##_bak1 == __##var##_bak2 && __##var##_bak2  = var ) {      \
+    if ( __##var##_bak1 == __##var##_bak2 && __##var##_bak2  == var ) {      \
         num = var;                                                          \
     } else if ( __##var##_bak1 == __##var##_bak2  ) {                       \
         var =  __##var##_bak1;                                              \
-        num = var                                                           \
+        num = var;                                                           \
     } else if ( __##var##_bak2 == var ) {                                   \
         __##var##_bak1 =  __##var##_bak2;                               \
-        num = __##var##_bak2                                            \
+        num = __##var##_bak2;                                            \
     } else  {                                                           \
         __##var##_bak2 =  __##var##_bak1;                               \
-        num = __##var##_bak1                                            \
+        num = __##var##_bak1;                                           \
     }                                                                   \
 }
 
@@ -72,5 +72,11 @@
 
 
 CREATE_BACKUP_NUM_EXTERN(now_time);
+CREATE_BACKUP_NUM_EXTERN(now_state);
+CREATE_BACKUP_NUM_EXTERN(saved_state);
+CREATE_BACKUP_NUM_EXTERN(cold_start);
+CREATE_BACKUP_NUM_EXTERN(controlFlowChecksum);
+
+
 
 #endif //STM32V3_DATA_H

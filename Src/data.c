@@ -6,5 +6,8 @@
 
 CREATE_BACKUP_NUM(now_time);
 CREATE_BACKUP_NUM(now_state);
+CREATE_BACKUP_NUM(saved_state);
+CREATE_BACKUP_NUM(cold_start);
+CREATE_BACKUP_NUM(controlFlowChecksum);
 
 

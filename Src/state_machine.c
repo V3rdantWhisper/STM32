@@ -7,6 +7,7 @@
 #include "zlg7290.h"
 #include "beep.h"
 #include "i2c.h"
+#include "data.h"
 
 #define STATE_CHECKSUM_INIT        0x1
 #define STATE_CHECKSUM_IDLE        0x10
@@ -21,6 +22,13 @@
 #define PRE_STATE_CONFIG_TIME   (STATE_CHECKSUM_INIT  | STATE_CHECKSUM_CONFIG_TIME | STATE_CHECKSUM_ALARM_ON | STATE_CHECKSUM_IDLE | STATE_CHECKSUM_PAUSE)
 #define PRE_STATE_ALARM_ON      (STATE_CHECKSUM_TIME)
 
+#define CHECKSUM_VALID(CHK_SUM) {                \
+uint32_t chk;                           \
+GET_NUM_DATE(controlFlowChecksum, chk); \
+if( ( chk & CHK_SUM ) == 0){      \
+        Reset_Handler();                \
+    }                                   \
+}
 
 
 AlarmEvent __attribute__((section(".sodata"))) event_queue[8] = {0};
@@ -61,7 +69,7 @@ void RUNSTateIDLE(AlarmEvent Event) {
     HAL_SuspendTick();
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
     HAL_ResumeTick();
-    now_state = saved_state; // back to the saved state
+    UPDATE_NUM_BAK( now_state, saved_state ); // back to the saved state
 }
 
 // complete
@@ -79,11 +87,11 @@ void RUNStateCONFIGTIME(uint8_t Event) {
             ClockKeyboadProcess();
             break;
         case EVENT_SET_TIME:
-            now_state = STATE_TIME;
+            UPDATE_NUM_BAK( now_state, STATE_TIME );
             break;
         case EVENT_SET_IDLE:
-            saved_state = STATE_CONFIG_TIME;
-            now_state = STATE_IDLE;
+            UPDATE_NUM_BAK( saved_state, STATE_CONFIG_TIME);
+            UPDATE_NUM_BAK( now_state, STATE_IDLE);
             break;
         default:
             break;
@@ -97,7 +105,7 @@ void RUNStateALARM(AlarmEvent Event) {
         open_beep(2);
         close_beep(2);
     }
-    now_state = STATE_CONFIG_TIME;
+    UPDATE_NUM_BAK(now_state, STATE_CONFIG_TIME);
 
 }
 
@@ -105,7 +113,7 @@ void RUNStateALARM(AlarmEvent Event) {
 void RUNStateTIME(AlarmEvent Event) {
     switch (Event) {
         case EVENT_SET_PAUSE:
-            now_state = STATE_PAUSE;
+            UPDATE_NUM_BAK( now_state, STATE_PAUSE );
             break;
         case EVENT_KEYBOARD:
             for (int i = 0; i < 3; i++) {
@@ -117,14 +125,16 @@ void RUNStateTIME(AlarmEvent Event) {
                 return;
             }
             if (bottom_num == ZLG7290_KEY_POUND) {
-                now_state = STATE_PAUSE;
+                UPDATE_NUM_BAK( now_state, STATE_PAUSE );
             }
         default:
             FlashTime();
-            if (now_time != 0) {
+            uint64_t now;
+            GET_NUM_DATE(now_time, now);
+            if ( now != 0) {
                 HAL_Delay(50);
             } else {
-                now_state = STATE_ALARM_ON;
+                UPDATE_NUM_BAK( now_state, STATE_ALARM_ON );
             }
             break;
     }
@@ -142,17 +152,17 @@ void RUNStatePAUSE(AlarmEvent Event) {
             } else {
                 return;
             }
-            if (bottom_num == ZLG7290_KEY_POUND)
-                now_state = STATE_TIME;
-            else if (bottom_num == ZLG7290_KEY_STAR) {
-                now_state = STATE_CONFIG_TIME;
-                now_time = 0;
+            if (bottom_num == ZLG7290_KEY_POUND) {
+                UPDATE_NUM_BAK( now_state, STATE_TIME );
+            } else if (bottom_num == ZLG7290_KEY_STAR) {
+                UPDATE_NUM_BAK( now_state, STATE_CONFIG_TIME);
+                UPDATE_NUM_BAK( now_time, 0);
                 FlashTime();
             }
             break;
         case EVENT_SET_IDLE:
-            saved_state = STATE_PAUSE;
-            now_state = STATE_IDLE;
+            UPDATE_NUM_BAK( saved_state, STATE_PAUSE);
+            UPDATE_NUM_BAK( now_state, STATE_IDLE);
             break;
         default:
             break;
@@ -162,41 +172,32 @@ void RUNStatePAUSE(AlarmEvent Event) {
 
 void handleStateMachine() {
     AlarmEvent event = DequeueEvent();
+    uint32_t cks;
     switch (now_state) {
         case STATE_IDLE:
-            if( (controlFlowChecksum & PRE_STATE_IDLE) == 0){
-                Reset_Handler();
-            }
+            CHECKSUM_VALID(PRE_STATE_IDLE);
             RUNSTateIDLE(event);
-            controlFlowChecksum = STATE_CHECKSUM_IDLE;
+            UPDATE_NUM_BAK( controlFlowChecksum, STATE_CHECKSUM_IDLE );
             break;
         case STATE_CONFIG_TIME:
-            if( (controlFlowChecksum & PRE_STATE_CONFIG_TIME) == 0){
-                Reset_Handler();
-            }
+            CHECKSUM_VALID(PRE_STATE_CONFIG_TIME);
             RUNStateCONFIGTIME(event);
-            controlFlowChecksum = STATE_CHECKSUM_CONFIG_TIME;
+            UPDATE_NUM_BAK( controlFlowChecksum, STATE_CHECKSUM_CONFIG_TIME );
             break;
         case STATE_TIME:
-            if( (controlFlowChecksum & PRE_STATE_TIME) == 0){
-                Reset_Handler();
-            }
+            CHECKSUM_VALID(PRE_STATE_TIME);
             RUNStateTIME(event);
-            controlFlowChecksum = STATE_CHECKSUM_TIME;
+            UPDATE_NUM_BAK( controlFlowChecksum, STATE_CHECKSUM_TIME );
             break;
         case STATE_ALARM_ON:
-            if( (controlFlowChecksum & PRE_STATE_ALARM_ON) == 0){
-                Reset_Handler();
-            }
+            CHECKSUM_VALID(PRE_STATE_ALARM_ON);
             RUNStateALARM(event);
-            controlFlowChecksum = STATE_CHECKSUM_ALARM_ON;
+            UPDATE_NUM_BAK( controlFlowChecksum, STATE_CHECKSUM_ALARM_ON );
             break;
         case STATE_PAUSE:
-            if( (controlFlowChecksum & PRE_STATE_PAUSE) == 0){
-                Reset_Handler();
-            }
+            CHECKSUM_VALID(PRE_STATE_PAUSE);
             RUNStatePAUSE(event);
-            controlFlowChecksum = STATE_CHECKSUM_PAUSE;
+            UPDATE_NUM_BAK( controlFlowChecksum, STATE_CHECKSUM_PAUSE );
             break;
         default:
             now_state = STATE_CONFIG_TIME;
