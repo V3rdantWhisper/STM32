@@ -1,0 +1,3 @@
+/mnt/hgfs/VMshare2/project/STM32/CMakeFiles/STM32V3.elf.dir
+/mnt/hgfs/VMshare2/project/STM32/CMakeFiles/edit_cache.dir
+/mnt/hgfs/VMshare2/project/STM32/CMakeFiles/rebuild_cache.dir
