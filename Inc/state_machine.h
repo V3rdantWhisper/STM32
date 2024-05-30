@@ -27,7 +27,6 @@ typedef enum {
  * */
 
 
-
 typedef enum {
     EVENT_NONE,
     EVENT_SET_TIME,

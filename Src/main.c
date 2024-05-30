@@ -30,11 +30,12 @@
 #include "stm32f4xx_it.h"
 #include "state_machine.h"
 #include "data.h"
+#include "i2c.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+void I2C_ResetBus(I2C_HandleTypeDef *hi2c);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -105,11 +106,6 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 //  SM_INIT();
-
-    if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
-        // Initialization Error
-        Error_Handler();
-    }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -136,6 +132,8 @@ int main(void)
 //            HAL_Delay(random_number % 3);
 //        }
     }
+//      reset_i2c_bus();
+
     handleStateMachine();
 
   }
@@ -188,9 +186,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-/* USER CODE BEGIN 4 */
-
 /* USER CODE END 4 */
 
 /**

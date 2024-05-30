@@ -41,6 +41,7 @@ extern I2C_HandleTypeDef hi2c1;
 void MX_I2C1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void reset_i2c_bus();
 
 /* USER CODE END Prototypes */
 

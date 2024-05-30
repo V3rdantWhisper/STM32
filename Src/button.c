@@ -14,17 +14,22 @@ uint8_t bottom_num;
 
 
 uint8_t ZLG7290KeyToNum(uint8_t key);
+uint8_t num_to_ZLG7290Key(uint8_t num);
 
 void FlashTime() {
-    time_buffer[0] = now_time / 10000000;
-    time_buffer[1] = now_time / 1000000 % 10;
-    time_buffer[2] = now_time / 100000 % 10;
-    time_buffer[3] = now_time / 10000 % 10;
-    time_buffer[4] = now_time / 1000 % 10;
-    time_buffer[5] = now_time / 100 % 10;
-    time_buffer[6] = now_time / 10 % 10;
-    time_buffer[7] = now_time % 10;
+    time_buffer[0] = num_to_ZLG7290Key(now_time / 10000000 );
+    time_buffer[1] = num_to_ZLG7290Key( now_time / 1000000 % 10 );
+    time_buffer[2] = num_to_ZLG7290Key( now_time / 100000 % 10 );
+    time_buffer[3] = num_to_ZLG7290Key( now_time / 10000 % 10 );
+    time_buffer[4] = num_to_ZLG7290Key( now_time / 1000 % 10 );
+    time_buffer[5] = num_to_ZLG7290Key( now_time / 100 % 10 );
+    time_buffer[6] = num_to_ZLG7290Key( now_time / 10 % 10 );
+    time_buffer[7] = num_to_ZLG7290Key( now_time % 10 );
+
     ZLG7290_Write(&hi2c1, ZLG7290_ADDR_DPRAM0, time_buffer, 8);
+
+
+
 }
 
 uint8_t ZLG7290KeyToNum(uint8_t key) {
@@ -65,6 +70,43 @@ uint8_t ZLG7290KeyToNum(uint8_t key) {
     }
 }
 
+uint8_t num_to_ZLG7290Key(uint8_t num) {
+    switch (num) {
+        case 1:
+            return ZLG7290_DISPLAY_1;
+            break;
+        case 2:
+            return ZLG7290_DISPLAY_2;
+            break;
+        case 3:
+            return ZLG7290_DISPLAY_3;
+            break;
+        case 4:
+            return ZLG7290_DISPLAY_4;
+            break;
+        case 5:
+            return ZLG7290_DISPLAY_5;
+            break;
+        case 6:
+            return ZLG7290_DISPLAY_6;
+            break;
+        case 7:
+            return ZLG7290_DISPLAY_7;
+            break;
+        case 8:
+            return ZLG7290_DISPLAY_8;
+            break;
+        case 9:
+            return ZLG7290_DISPLAY_9;
+            break;
+        case 0:
+            return ZLG7290_DISPLAY_0;
+            break;
+        default:
+            return ZLG7290_INVALID_NUM;
+            break;
+    }
+}
 
 
 void ClockKeyboadProcess() {
@@ -90,7 +132,7 @@ void ClockKeyboadProcess() {
             FlashTime();
             break;
         case ZLG7290_KEY_STAR:
-            EnqueueEvent(EVENT_SET_ALARM);
+            EnqueueEvent(EVENT_SET_TIME);
             break;
         case ZLG7290_KEY_POUND:
             EnqueueEvent(EVENT_SET_PAUSE);

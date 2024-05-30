@@ -65,10 +65,10 @@ void RUNSTateIDLE(AlarmEvent Event) {
 void RUNStateCONFIGTIME(uint8_t Event) {
     switch (Event) {
         case EVENT_KEYBOARD:
-            __HAL_RCC_I2C1_FORCE_RESET();
-            __HAL_RCC_I2C1_RELEASE_RESET();
-            for (int i = 0; i < 1; i++) {
-                ZLG7290_Read(&hi2c1, ZLG7290_ADDR_KEY, read_buffer, 1);
+//            __HAL_RCC_I2C1_FORCE_RESET();
+//            __HAL_RCC_I2C1_RELEASE_RESET();
+            for (int i = 0; i < 3; i++) {
+                ZLG7290_Read(&hi2c1, ZLG7290_ADDR_KEY, read_buffer+i, 1);
             }
             if ( read_buffer[0] == read_buffer[1] && read_buffer[0] == read_buffer[2] ) {
                 bottom_num = read_buffer[0];

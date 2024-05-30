@@ -42,13 +42,20 @@ HAL_StatusTypeDef ZLG7290_Read(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t* 
         status = HAL_I2C_Mem_Read(hi2c, ZLG7290_READ_ADDR, addr, I2C_MEMADD_SIZE_8BIT, buf, bufsz, ZLG7290_I2C_Timeout);
         if (status == HAL_OK)
             break;
+        else if (status == HAL_BUSY || status == HAL_TIMEOUT)
+        {
+            HAL_I2C_DeInit(hi2c);
+            HAL_Delay(5);
+            HAL_I2C_Init(hi2c);
+            HAL_Delay(5);
+        }
     }
     return status;
 }
 
-static HAL_StatusTypeDef ZLG7290_WriteByte(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t* buf)
+static HAL_StatusTypeDef ZLG7290_WriteByte(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t* buf, uint16_t bufsz)
 {
-    return HAL_I2C_Mem_Write(hi2c, ZLG7290_WRITE_ADDR, addr, I2C_MEMADD_SIZE_8BIT, buf, 1, ZLG7290_I2C_Timeout);
+    return HAL_I2C_Mem_Write(hi2c, ZLG7290_WRITE_ADDR, addr, I2C_MEMADD_SIZE_8BIT, buf, bufsz, ZLG7290_I2C_Timeout);
 }
 
 HAL_StatusTypeDef ZLG7290_Write(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t* buf, uint16_t bufsz)
@@ -56,13 +63,16 @@ HAL_StatusTypeDef ZLG7290_Write(I2C_HandleTypeDef* hi2c, uint16_t addr, uint8_t*
     HAL_StatusTypeDef status = HAL_OK;
     for (uint32_t i = 0; i < ZLG7290_I2C_Retries; ++i)
     {
-        for (uint32_t j = 1; j <= bufsz; ++j)
-        {
-            status |= ZLG7290_WriteByte(hi2c, addr + bufsz - j, buf + bufsz - j);
-            HAL_Delay(5);
-        }
+        status |= ZLG7290_WriteByte(hi2c, addr, buf, bufsz);
         if (status == HAL_OK)
             break;
+        else if (status == HAL_BUSY || status == HAL_TIMEOUT)
+        {
+            HAL_I2C_DeInit(hi2c);
+            HAL_Delay(5);
+            HAL_I2C_Init(hi2c);
+            HAL_Delay(5);
+        }
     }
     return status;
 }
