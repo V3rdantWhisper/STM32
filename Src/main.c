@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "crc.h"
 #include "i2c.h"
+#include "rng.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -97,13 +99,15 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-//  HAL_Delay(1);
+  HAL_Delay(10);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
+  MX_CRC_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
 //  SM_INIT();
   /* USER CODE END 2 */
@@ -125,14 +129,15 @@ int main(void)
       cold_start = 0xdeadbeef;
     }
     /* USER CODE BEGIN 3 */
+
+    // Add random delay to avoid collision side channel attack
     if (now_state != STATE_TIME) {
-//        if (__HAL_RNG_GET_FLAG(&hrng, RNG_FLAG_DRDY)) {
-//            uint32_t random_number;
-//            HAL_RNG_GenerateRandomNumber(&hrng, &random_number);
-//            HAL_Delay(random_number % 3);
-//        }
+        if (__HAL_RNG_GET_FLAG(&hrng, RNG_FLAG_DRDY)) {
+            uint32_t random_number;
+            HAL_RNG_GenerateRandomNumber(&hrng, &random_number);
+            HAL_Delay(random_number % 3);
+        }
     }
-//      reset_i2c_bus();
 
     handleStateMachine();
 
