@@ -24,11 +24,11 @@
 uint32_t controlFlowChecksum = STATE_CHECKSUM_INIT;
 
 AlarmEvent event_queue[8] = {0};
-uint8_t event_queue_head = 0;
-uint8_t event_queue_tail = 0;
-uint8_t event_queue_size = 0;
-AlarmState now_state = STATE_CONFIG_TIME;
-AlarmState saved_state = STATE_CONFIG_TIME;
+uint8_t __attribute__((section(".data"))) event_queue_head = 0;
+uint8_t __attribute__((section(".data"))) event_queue_tail = 0;
+uint8_t __attribute__((section(".data"))) event_queue_size = 0;
+AlarmState __attribute__((section(".data"))) now_state = STATE_CONFIG_TIME;
+AlarmState __attribute__((section(".data"))) saved_state = STATE_CONFIG_TIME;
 
 void EnqueueEvent(AlarmEvent event) {
 //    __disable_irq();
@@ -65,8 +65,6 @@ void RUNSTateIDLE(AlarmEvent Event) {
 void RUNStateCONFIGTIME(uint8_t Event) {
     switch (Event) {
         case EVENT_KEYBOARD:
-//            __HAL_RCC_I2C1_FORCE_RESET();
-//            __HAL_RCC_I2C1_RELEASE_RESET();
             for (int i = 0; i < 3; i++) {
                 ZLG7290_Read(&hi2c1, ZLG7290_ADDR_KEY, read_buffer+i, 1);
             }
@@ -106,10 +104,21 @@ void RUNStateTIME(AlarmEvent Event) {
         case EVENT_SET_PAUSE:
             now_state = STATE_PAUSE;
             break;
+        case EVENT_KEYBOARD:
+            for (int i = 0; i < 3; i++) {
+                ZLG7290_Read(&hi2c1, ZLG7290_ADDR_KEY, &read_buffer[i], 1);
+            }
+            if ( read_buffer[0] == read_buffer[1] && read_buffer[0] == read_buffer[2] ) {
+                bottom_num = read_buffer[0];
+            } else {
+                return;
+            }
+            if (bottom_num == ZLG7290_KEY_POUND) {
+                now_state = STATE_PAUSE;
+            }
         default:
+            FlashTime();
             if (now_time != 0) {
-                now_time--;
-                FlashTime();
                 HAL_Delay(50);
             } else {
                 now_state = STATE_ALARM_ON;

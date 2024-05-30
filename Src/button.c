@@ -7,10 +7,10 @@
 #include "state_machine.h"
 #define TIME_MAX 99999999
 
-uint8_t read_buffer[8] = {0};
-uint8_t time_buffer[8] = {0};
-uint64_t now_time = 0;
-uint8_t bottom_num;
+uint8_t  __attribute__((section(".data"))) read_buffer[8] = {0};
+uint8_t  __attribute__((section(".data"))) time_buffer[8] = {0};
+uint64_t __attribute__((section(".data"))) now_time = 0;
+uint8_t  __attribute__((section(".data"))) bottom_num;
 
 
 uint8_t ZLG7290KeyToNum(uint8_t key);
@@ -27,9 +27,6 @@ void FlashTime() {
     time_buffer[7] = num_to_ZLG7290Key( now_time % 10 );
 
     ZLG7290_Write(&hi2c1, ZLG7290_ADDR_DPRAM0, time_buffer, 8);
-
-
-
 }
 
 uint8_t ZLG7290KeyToNum(uint8_t key) {
