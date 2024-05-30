@@ -23,12 +23,12 @@
 
 uint32_t controlFlowChecksum = STATE_CHECKSUM_INIT;
 
-AlarmEvent event_queue[8] = {0};
-uint8_t __attribute__((section(".data"))) event_queue_head = 0;
-uint8_t __attribute__((section(".data"))) event_queue_tail = 0;
-uint8_t __attribute__((section(".data"))) event_queue_size = 0;
-AlarmState __attribute__((section(".data"))) now_state = STATE_CONFIG_TIME;
-AlarmState __attribute__((section(".data"))) saved_state = STATE_CONFIG_TIME;
+AlarmEvent __attribute__((section(".sodata"))) event_queue[8] = {0};
+uint8_t __attribute__((section(".sodata"))) event_queue_head = 0;
+uint8_t __attribute__((section(".sodata"))) event_queue_tail = 0;
+uint8_t __attribute__((section(".sodata"))) event_queue_size = 0;
+AlarmState __attribute__((section(".sodata"))) now_state = STATE_CONFIG_TIME;
+AlarmState __attribute__((section(".sodata"))) saved_state = STATE_CONFIG_TIME;
 
 void EnqueueEvent(AlarmEvent event) {
 //    __disable_irq();
@@ -141,6 +141,11 @@ void RUNStatePAUSE(AlarmEvent Event) {
             }
             if (bottom_num == ZLG7290_KEY_POUND)
                 now_state = STATE_TIME;
+            else if (bottom_num == ZLG7290_KEY_STAR) {
+                now_state = STATE_CONFIG_TIME;
+                now_time = 0;
+                FlashTime();
+            }
             break;
         case EVENT_SET_IDLE:
             saved_state = STATE_PAUSE;
@@ -192,6 +197,7 @@ void handleStateMachine() {
             controlFlowChecksum = STATE_CHECKSUM_PAUSE;
             break;
         default:
+            now_state = STATE_CONFIG_TIME;
             break;
     }
 }

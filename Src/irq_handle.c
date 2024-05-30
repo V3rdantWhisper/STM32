@@ -23,7 +23,7 @@ void HAL_IncTick() {
     uwTick++;
     switch (now_state) {
         case STATE_TIME :
-            if ( now_time != 0 && uwTick % 100 == 0 ) {
+            if ( now_time != 0 && uwTick % 500 == 0 ) {
                 now_time--;
             }
         case STATE_ALARM_ON:

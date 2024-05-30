@@ -185,6 +185,16 @@ SECTIONS
     _eccmram = .;       /* create a global symbol at ccmram end */
   } >CCMRAM AT> FLASH
 
+  .sodata :
+  {
+    . = ALIGN(4);
+    _ssodata = .;        /* create a global symbol at data start */
+    . = ALIGN(4);
+    _esodata = .;        /* define a global symbol at data end */
+  } >RAM
+
+
+
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .bss :

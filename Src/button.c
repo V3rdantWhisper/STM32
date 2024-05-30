@@ -7,10 +7,10 @@
 #include "state_machine.h"
 #define TIME_MAX 99999999
 
-uint8_t  __attribute__((section(".data"))) read_buffer[8] = {0};
-uint8_t  __attribute__((section(".data"))) time_buffer[8] = {0};
-uint64_t __attribute__((section(".data"))) now_time = 0;
-uint8_t  __attribute__((section(".data"))) bottom_num;
+uint8_t  __attribute__((section(".sodata"))) read_buffer[8] = {0};
+uint8_t  __attribute__((section(".sodata"))) time_buffer[8] = {0};
+uint64_t __attribute__((section(".sodata"))) now_time = 0;
+uint8_t  __attribute__((section(".sodata"))) bottom_num;
 
 
 uint8_t ZLG7290KeyToNum(uint8_t key);
