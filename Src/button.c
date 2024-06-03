@@ -135,6 +135,7 @@ void ClockKeyboadProcess() {
             break;
         case ZLG7290_KEY_STAR:
             EnqueueEvent(EVENT_SET_TIME);
+
             break;
         case ZLG7290_KEY_POUND:
             EnqueueEvent(EVENT_SET_PAUSE);

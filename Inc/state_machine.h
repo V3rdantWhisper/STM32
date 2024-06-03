@@ -33,5 +33,6 @@ extern void Reset_Handler();
 void handleStateMachine();
 AlarmEvent DequeueEvent();
 void EnqueueEvent(AlarmEvent event);
+void QueueInit();
 
 #endif //STM32V3_STATE_MACHINE_H

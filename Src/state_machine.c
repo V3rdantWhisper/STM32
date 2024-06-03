@@ -40,6 +40,15 @@ AlarmState __attribute__((section(".sodata"))) saved_state = STATE_CONFIG_TIME;
 uint32_t __attribute__((section(".sodata"))) cold_start;
 uint32_t __attribute__((section(".sodata"))) controlFlowChecksum = STATE_CHECKSUM_INIT;
 
+void QueueInit() {
+    event_queue_head = 0;
+    event_queue_tail = 0;
+    event_queue_size = 0;
+    for (int i = 0; i < 8; i++) {
+//        printf("event_queue[%d] = %d\n", i, event_queue[i])
+        event_queue[i] = EVENT_NONE;
+    }
+}
 
 void EnqueueEvent(AlarmEvent event) {
 //    __disable_irq();
@@ -52,6 +61,8 @@ void EnqueueEvent(AlarmEvent event) {
     }
 //    __enable_irq();
 }
+
+
 
 AlarmEvent DequeueEvent() {
     if (event_queue_size == 0) {
@@ -132,7 +143,7 @@ void RUNStateTIME(AlarmEvent Event) {
             uint64_t now;
             GET_NUM_DATE(now_time, now);
             if ( now != 0) {
-                HAL_Delay(50);
+//                HAL_Delay(50);
             } else {
                 UPDATE_NUM_BAK( now_state, STATE_ALARM_ON );
             }
@@ -172,7 +183,7 @@ void RUNStatePAUSE(AlarmEvent Event) {
 
 void handleStateMachine() {
     AlarmEvent event = DequeueEvent();
-    uint32_t cks;
+//    uint32_t cks;
     switch (now_state) {
         case STATE_IDLE:
             CHECKSUM_VALID(PRE_STATE_IDLE);

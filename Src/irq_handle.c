@@ -22,7 +22,7 @@ void HAL_IncTick() {
     uwTick++;
     switch (now_state) {
         case STATE_TIME :
-            if ( now_time > 0 && uwTick % 500 == 0 ) {
+            if ( now_time > 0 && uwTick % 1 == 0 ) {
                 UPDATE_NUM_BAK( now_time, now_time-1 );
             }
         case STATE_ALARM_ON:

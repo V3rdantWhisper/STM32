@@ -20,6 +20,7 @@
 #include "main.h"
 #include "crc.h"
 #include "i2c.h"
+#include "iwdg.h"
 #include "rng.h"
 #include "usart.h"
 #include "gpio.h"
@@ -33,6 +34,7 @@
 #include "state_machine.h"
 #include "data.h"
 #include "i2c.h"
+#include "iwdg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -100,17 +102,28 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CRC_Init();
   MX_RNG_Init();
+//  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   uint32_t cld;
+
+  UPDATE_NUM_BAK(cold_start, 0);
   GET_NUM_DATE(cold_start, cld);
   if(cld == 0xdeadbeef != 0){ //checksum
+      QueueInit();
+//      UPDATE_NUM_BAK(now_state, STATE_CONFIG_TIME);
         //热启动
     } else {
         //冷启动
         HAL_Delay(0x40);    // 上电复位延时处理
         UPDATE_NUM_BAK(now_state, STATE_CONFIG_TIME);
-        UPDATE_NUM_BAK(now_state, STATE_CONFIG_TIME);
-        UPDATE_NUM_BAK(cold_start, 0xdeadbeef)
+        UPDATE_NUM_BAK(now_time,  0);
+        UPDATE_NUM_BAK(cold_start, 0xdeadbeef);
+        QueueInit();
+        FlashTime();
+//          HAL_I2C_DeInit(hi2c);
+//          HAL_Delay(5);
+//          HAL_I2C_Init(hi2c);
+//          HAL_Delay(5);/
     }
 
   /* USER CODE END 2 */
@@ -132,6 +145,7 @@ int main(void)
             HAL_Delay(random_number % 3);
         }
     }
+//    HAL_IWDG_Refresh(&hiwdg);
 
     handleStateMachine();
 
@@ -156,8 +170,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 15;
@@ -184,7 +199,8 @@ void SystemClock_Config(void)
   }
 }
 
-/* USEXCR CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
+
 /* USER CODE END 4 */
 
 /**
