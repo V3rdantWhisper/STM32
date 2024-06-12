@@ -20,6 +20,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void HAL_IncTick() {
     uwTick++;
+    if (uwTick % 100 == 0) {
+        FlashTime();
+    }
     switch (now_state) {
         case STATE_TIME :
             if ( now_time > 0 && uwTick % 500 == 0 ) {

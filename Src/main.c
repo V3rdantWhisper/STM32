@@ -20,6 +20,7 @@
 #include "main.h"
 #include "crc.h"
 #include "i2c.h"
+#include "iwdg.h"
 #include "rng.h"
 #include "usart.h"
 #include "gpio.h"
@@ -64,7 +65,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint64_t wdg_num = 0;
 /* USER CODE END 0 */
 
 /**
@@ -100,6 +101,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CRC_Init();
   MX_RNG_Init();
+  MX_IWDG_Init();
+
   /* USER CODE BEGIN 2 */
   uint32_t cld;
   GET_NUM_DATE(cold_start, cld);
@@ -130,9 +133,14 @@ int main(void)
             uint32_t random_number;
             HAL_RNG_GenerateRandomNumber(&hrng, &random_number);
             HAL_Delay(random_number % 3);
+
         }
     }
 
+    wdg_num ++;
+    if (wdg_num % 10000 == 0) {
+        HAL_IWDG_Refresh(&hiwdg);
+    }
     handleStateMachine();
 
   }
@@ -156,8 +164,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 15;
@@ -184,7 +193,8 @@ void SystemClock_Config(void)
   }
 }
 
-/* USEXCR CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
+
 /* USER CODE END 4 */
 
 /**

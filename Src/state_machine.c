@@ -81,6 +81,9 @@ void RUNStateCONFIGTIME(uint8_t Event) {
             }
             if ( read_buffer[0] == read_buffer[1] && read_buffer[0] == read_buffer[2] ) {
                 bottom_num = read_buffer[0];
+                for (int i = 0; i < 3; i++) {
+                    read_buffer[i] = 0;
+                }
             } else {
                 return;
             }

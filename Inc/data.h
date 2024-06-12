@@ -55,19 +55,17 @@
 
 //// check the crc
 //// 多路表决
-//#define GET_DATA(var) \
-//    if ( __##var##_crc1 && __##var##_crc2 ) {               \
-//        __##var##_crc3 = __##var##_crc1;                    \
-//           \
-//                                                            \
-//    } else if (  __##var##_crc1 && __##var##_crc3 ) {       \
-//        __##var##_crc2 = __##var##_crc1;                    \
-//    } else if (  __##var##_crc2 && __##var##_crc3 ) {       \
-//        __##var##_crc1 = __##var##_crc3;                    \
-//    } else {                                                \
-//        __##var##_crc1 = __##var##_crc3;                    \
-//                                                            \
-//    }
+#define CHECK_THE_CRC(var) \
+    if ( __##var##_crc1 && __##var##_crc2 ) {               \
+        __##var##_crc3 = __##var##_crc1;                    \
+    } else if (  __##var##_crc1 && __##var##_crc3 ) {       \
+        __##var##_crc2 = __##var##_crc1;                    \
+    } else if (  __##var##_crc2 && __##var##_crc3 ) {       \
+        __##var##_crc1 = __##var##_crc3;                    \
+    } else {                                                \
+        __##var##_crc1 = __##var##_crc3;                    \
+                                                            \
+    }
 
 
 
